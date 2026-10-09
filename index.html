@@ -77,13 +77,13 @@
       position: relative;
       z-index: 3;
       width: 100vw;
-      height: min(640px, 78svh);
+      height: min(570px, 76svh);
       display: flex;
       align-items: center;
-      gap: clamp(-230px, -15vw, -90px);
+      gap: clamp(-120px, -8vw, -60px);
       overflow-x: auto;
       overflow-y: hidden;
-      padding: 0 calc((100vw - min(620px, 58vw, 900px)) / 2);
+      padding: 0 calc((100vw - min(660px, 54vw, 840px)) / 2);
       scroll-snap-type: x mandatory;
       scroll-behavior: auto;
       -webkit-overflow-scrolling: touch;
@@ -113,9 +113,9 @@
 
     .entry-card {
       position: relative;
-      flex: 0 0 min(620px, 58vw, 900px);
+      flex: 0 0 min(660px, 54vw, 840px);
       display: block;
-      height: min(760px, 82svh);
+      height: min(690px, 72svh);
       border: 0;
       padding: 0;
       background: transparent;
@@ -219,18 +219,18 @@
     }
 
     .work .hold-badge {
-      right: 30%;
-      top: 33%;
+      right: 22%;
+      top: 43%;
     }
 
     .dream .hold-badge {
-      right: 40%;
-      top: 34%;
+      right: 31%;
+      top: 43%;
     }
 
     .cat .hold-badge {
-      right: 44%;
-      top: 36%;
+      right: 30%;
+      top: 47%;
     }
 
     .hold-badge::after {
@@ -343,14 +343,14 @@
         min-height: 520px;
         margin: 0 -10px;
         display: flex;
-        gap: clamp(-150px, -28vw, -86px);
+        gap: clamp(-96px, -22vw, -58px);
         padding: 0 8px;
         transform: none;
       }
 
       .entry-card {
-        flex-basis: calc((100vw - 16px) / 1.65);
-        height: min(600px, 72svh);
+        flex-basis: calc((100vw - 16px) / 1.42);
+        height: min(570px, 68svh);
       }
 
       .entry-card.work,
@@ -360,19 +360,25 @@
       }
 
       .hold-badge {
-        right: 38%;
-        top: 40%;
         min-width: 46px;
         height: 24px;
         padding: 0 9px;
         font-size: 10px;
       }
 
-      .work .hold-badge,
-      .dream .hold-badge,
+      .work .hold-badge {
+        right: 22%;
+        top: 43%;
+      }
+
+      .dream .hold-badge {
+        right: 25%;
+        top: 43%;
+      }
+
       .cat .hold-badge {
-        right: 34%;
-        top: 36%;
+        right: 28%;
+        top: 47%;
       }
 
       .world-title {
