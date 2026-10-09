@@ -36,7 +36,7 @@
       content: "";
       position: fixed;
       inset: -24px;
-      z-index: -3;
+      z-index: 0;
       background-image: url("assets/expanded-art-bg.png");
       background-position: center;
       background-size: cover;
@@ -49,16 +49,16 @@
       content: "";
       position: fixed;
       inset: 0;
-      z-index: -2;
+      z-index: 1;
       background:
-        radial-gradient(circle at 50% 48%, rgba(245, 246, 241, 0.08), transparent 34%),
-        linear-gradient(90deg, rgba(9, 10, 14, 0.36), rgba(9, 10, 14, 0.04) 34%, rgba(9, 10, 14, 0.3));
+        radial-gradient(circle at 50% 48%, rgba(245, 246, 241, 0.04), transparent 34%),
+        linear-gradient(90deg, rgba(9, 10, 14, 0.18), rgba(9, 10, 14, 0.02) 34%, rgba(9, 10, 14, 0.14));
       pointer-events: none;
     }
 
     .entries {
       position: relative;
-      z-index: 2;
+      z-index: 3;
       width: 100vw;
       height: min(640px, 78svh);
       display: flex;
@@ -82,7 +82,7 @@
       position: fixed;
       left: 7vw;
       top: 9vh;
-      z-index: 1;
+      z-index: 2;
       width: clamp(120px, 13vw, 220px);
       height: auto;
       opacity: 0.72;
