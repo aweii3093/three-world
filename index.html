@@ -1,4 +1,4 @@
-<!doctype html>
+﻿<!doctype html>
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
@@ -19,7 +19,7 @@
       min-height: 100svh;
       font-family: Arial, "Microsoft YaHei", "PingFang SC", sans-serif;
       color: rgba(245, 246, 241, 0.9);
-      background: #858ba0;
+      background: #858ba0 url("assets/expanded-art-bg.webp") center / cover fixed no-repeat;
       overflow: hidden;
     }
 
@@ -30,6 +30,7 @@
       place-items: center;
       padding: clamp(22px, 5vw, 72px);
       isolation: isolate;
+      background: url("assets/expanded-art-bg.webp") center / cover no-repeat;
     }
 
     .background-art {
@@ -51,7 +52,7 @@
       position: fixed;
       inset: -24px;
       z-index: 0;
-      background-image: url("assets/expanded-art-bg.png");
+      background-image: url("assets/expanded-art-bg.webp");
       background-position: center;
       background-size: cover;
       background-repeat: no-repeat;
@@ -372,7 +373,7 @@
 </head>
 <body>
   <main class="page">
-    <img class="background-art" src="assets/expanded-art-bg.png" alt="">
+    <img class="background-art" src="assets/expanded-art-bg.webp" alt="">
     <img class="world-title" src="homepage-overlay.png" alt="">
     <section class="entries" aria-label="world entries">
       <button class="entry-card work" type="button" data-target="work.html" data-welcome="welcome to aweii's work world" aria-label="Click to enter work">
@@ -513,3 +514,4 @@
   </script>
 </body>
 </html>
+
