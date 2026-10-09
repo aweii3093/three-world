@@ -1,0 +1,499 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>aweii's world / Guang's world</title>
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+      margin: 0;
+    }
+
+    body {
+      min-height: 100svh;
+      font-family: Arial, "Microsoft YaHei", "PingFang SC", sans-serif;
+      color: rgba(245, 246, 241, 0.9);
+      background: #858ba0;
+      overflow: hidden;
+    }
+
+    .page {
+      position: relative;
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      padding: clamp(22px, 5vw, 72px);
+      isolation: isolate;
+    }
+
+    .page::before {
+      content: "";
+      position: fixed;
+      inset: -24px;
+      z-index: -3;
+      background-image: url("assets/expanded-art-bg.png");
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      filter: saturate(0.9);
+      transform: scale(1.04);
+    }
+
+    .page::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background:
+        radial-gradient(circle at 50% 48%, rgba(245, 246, 241, 0.08), transparent 34%),
+        linear-gradient(90deg, rgba(9, 10, 14, 0.36), rgba(9, 10, 14, 0.04) 34%, rgba(9, 10, 14, 0.3));
+      pointer-events: none;
+    }
+
+    .entries {
+      position: relative;
+      z-index: 2;
+      width: 100vw;
+      height: min(640px, 78svh);
+      display: flex;
+      align-items: center;
+      gap: clamp(-230px, -15vw, -90px);
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 0 calc((100vw - min(620px, 58vw, 900px)) / 2);
+      scroll-snap-type: x mandatory;
+      scroll-behavior: auto;
+      -webkit-overflow-scrolling: touch;
+      transform: translateY(clamp(18px, 4vh, 44px));
+      scrollbar-width: none;
+    }
+
+    .entries::-webkit-scrollbar {
+      display: none;
+    }
+
+    .world-title {
+      position: fixed;
+      left: 7vw;
+      top: 9vh;
+      z-index: 1;
+      width: clamp(120px, 13vw, 220px);
+      height: auto;
+      opacity: 0.72;
+      filter:
+        drop-shadow(0 0 10px rgba(245, 246, 241, 0.22))
+        drop-shadow(0 20px 22px rgba(0, 0, 0, 0.28));
+      pointer-events: none;
+      user-select: none;
+      transition: left 7s ease-in-out, top 7s ease-in-out;
+    }
+
+    .entry-card {
+      position: relative;
+      flex: 0 0 min(620px, 58vw, 900px);
+      display: block;
+      height: min(760px, 82svh);
+      border: 0;
+      padding: 0;
+      background: transparent;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      touch-action: pan-x;
+      scroll-snap-align: center;
+      filter:
+        brightness(0.52)
+        drop-shadow(0 0 8px rgba(245, 246, 241, 0.14))
+        drop-shadow(0 26px 28px rgba(0, 0, 0, 0.35));
+      animation: floatEntry 6.2s ease-in-out infinite;
+      opacity: 0.62;
+      transition: filter 240ms ease, opacity 240ms ease, transform 240ms ease;
+    }
+
+    .entry-card.work {
+      animation-delay: 0s;
+    }
+
+    .entry-card.dream {
+      animation-delay: -0.7s;
+    }
+
+    .entry-card.cat {
+      animation-delay: -1.2s;
+    }
+
+    .entry-card.is-centered {
+      opacity: 1;
+      filter:
+        brightness(1)
+        drop-shadow(0 0 14px rgba(245, 246, 241, 0.5))
+        drop-shadow(0 0 34px rgba(245, 246, 241, 0.24))
+        drop-shadow(0 28px 30px rgba(0, 0, 0, 0.38));
+      transform: translateY(-2px);
+    }
+
+    .entry-card:hover,
+    .entry-card:focus-visible {
+      filter:
+        brightness(1)
+        drop-shadow(0 0 16px rgba(245, 246, 241, 0.58))
+        drop-shadow(0 0 38px rgba(245, 246, 241, 0.28))
+        drop-shadow(0 30px 32px rgba(0, 0, 0, 0.42));
+      outline: none;
+      transform: translateY(-4px);
+    }
+
+    .entry-card.is-entering {
+      animation: activateLift 680ms ease both;
+      filter:
+        drop-shadow(0 0 22px rgba(245, 246, 241, 0.76))
+        drop-shadow(0 0 54px rgba(245, 246, 241, 0.34))
+        drop-shadow(0 30px 34px rgba(0, 0, 0, 0.42));
+    }
+
+    .entry-card img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: contain;
+      object-position: center;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .hold-badge {
+      position: absolute;
+      right: 43%;
+      top: 42%;
+      z-index: 2;
+      min-width: 58px;
+      height: 30px;
+      padding: 0 13px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(245, 246, 241, 0.78);
+      border-radius: 999px;
+      color: rgba(245, 246, 241, 0.92);
+      background: rgba(9, 10, 14, 0.56);
+      box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
+      backdrop-filter: blur(8px);
+      font-size: clamp(10px, 0.9vw, 13px);
+      line-height: 1;
+      letter-spacing: 0;
+      pointer-events: none;
+    }
+
+    .work .hold-badge {
+      right: 30%;
+      top: 33%;
+    }
+
+    .dream .hold-badge {
+      right: 40%;
+      top: 34%;
+    }
+
+    .cat .hold-badge {
+      right: 44%;
+      top: 36%;
+    }
+
+    .hold-badge::after {
+      content: "CLICK";
+      color: rgba(245, 246, 241, 0.94);
+    }
+
+    .welcome-pop {
+      position: fixed;
+      left: var(--pop-left, 50%);
+      top: var(--pop-top, clamp(80px, 18vh, 160px));
+      z-index: 8;
+      max-width: min(420px, 82vw);
+      padding: 10px 14px;
+      border: 1px solid rgba(245, 246, 241, 0.72);
+      border-radius: 999px;
+      color: rgba(245, 246, 241, 0.94);
+      background: rgba(8, 8, 11, 0.46);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.32);
+      backdrop-filter: blur(10px);
+      font-size: clamp(12px, 1.2vw, 16px);
+      line-height: 1.2;
+      text-align: center;
+      opacity: 0;
+      transform: translate(-50%, calc(-100% + 8px)) scale(0.96);
+      transition: opacity 220ms ease, transform 220ms ease;
+      pointer-events: none;
+    }
+
+    .page.is-entering .welcome-pop {
+      opacity: 1;
+      transform: translate(-50%, -100%) scale(1);
+    }
+
+    .impact {
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      z-index: 7;
+      width: 18px;
+      height: 18px;
+      border: 1px solid rgba(245, 246, 241, 0.74);
+      border-radius: 999px;
+      opacity: 0;
+      transform: translate(-50%, -50%) scale(0.4);
+      pointer-events: none;
+    }
+
+    .page.is-entering .impact {
+      display: none;
+    }
+
+    .page.is-entering .impact {
+      animation: softRing 680ms ease-out both;
+    }
+
+    @keyframes floatEntry {
+      0%,
+      100% {
+        transform: translateY(0);
+      }
+
+      50% {
+        transform: translateY(-12px);
+      }
+    }
+
+    @keyframes activateLift {
+      0% {
+        transform: translateY(0) scale(1);
+      }
+
+      48% {
+        transform: translateY(-12px) scale(1.035);
+      }
+
+      100% {
+        transform: translateY(-6px) scale(1.012);
+      }
+    }
+
+    @keyframes softRing {
+      0% {
+        opacity: 0.72;
+        transform: translate(-50%, -50%) scale(0.4);
+        box-shadow: 0 0 18px rgba(245, 246, 241, 0.42);
+      }
+
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(12);
+        box-shadow: 0 0 48px rgba(245, 246, 241, 0.06);
+      }
+    }
+
+    @media (max-width: 780px) {
+      body {
+        overflow-y: auto;
+      }
+
+      .page {
+        min-height: 100svh;
+        padding: 58px 10px 34px;
+        display: block;
+      }
+
+      .entries {
+        width: 100vw;
+        height: calc(100svh - 132px);
+        min-height: 520px;
+        margin: 0 -10px;
+        display: flex;
+        gap: clamp(-150px, -28vw, -86px);
+        padding: 0 8px;
+        transform: none;
+      }
+
+      .entry-card {
+        flex-basis: calc((100vw - 16px) / 1.65);
+        height: min(600px, 72svh);
+      }
+
+      .entry-card.work,
+      .entry-card.dream,
+      .entry-card.cat {
+        width: auto;
+      }
+
+      .hold-badge {
+        right: 38%;
+        top: 40%;
+        min-width: 46px;
+        height: 24px;
+        padding: 0 9px;
+        font-size: 10px;
+      }
+
+      .work .hold-badge,
+      .dream .hold-badge,
+      .cat .hold-badge {
+        right: 34%;
+        top: 36%;
+      }
+
+      .world-title {
+        width: clamp(82px, 22vw, 128px);
+      }
+
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <img class="world-title" src="homepage-overlay.png" alt="">
+    <section class="entries" aria-label="world entries">
+      <button class="entry-card work" type="button" data-target="work.html" data-welcome="welcome to aweii's work world" aria-label="Click to enter work">
+        <img src="assets/9a5a1f215b97d98b31f3528916563c5d.png" alt="">
+        <span class="hold-badge" aria-hidden="true"></span>
+      </button>
+
+      <button class="entry-card dream" type="button" data-target="aweii-world.html" data-welcome="welcome to aweii's dream world" aria-label="Click to enter dream">
+        <img src="assets/bb73433113cac556f82f06ecbc562f03.png" alt="">
+        <span class="hold-badge" aria-hidden="true"></span>
+      </button>
+
+      <button class="entry-card cat" type="button" data-target="cat-world.html" data-welcome="welcome to guang's world" aria-label="Click to enter cat">
+        <img src="assets/50eb40927c0c8fa6be8e2639988863e6.png" alt="">
+        <span class="hold-badge" aria-hidden="true"></span>
+      </button>
+    </section>
+    <span class="impact" aria-hidden="true"></span>
+    <div class="welcome-pop" aria-live="polite"></div>
+  </main>
+  <script>
+    const worldTitle = document.querySelector(".world-title");
+
+    function moveWorldTitle() {
+      const titleBox = worldTitle.getBoundingClientRect();
+      const padding = 24;
+      const maxX = Math.max(padding, window.innerWidth - titleBox.width - padding);
+      const maxY = Math.max(padding, window.innerHeight - titleBox.height - padding);
+      const travelX = Math.max(0, maxX - padding);
+      const travelY = Math.max(0, maxY - padding);
+      worldTitle.style.left = `${padding + Math.random() * travelX}px`;
+      worldTitle.style.top = `${padding + Math.random() * travelY}px`;
+    }
+
+    window.addEventListener("resize", moveWorldTitle);
+    window.setTimeout(moveWorldTitle, 500);
+    window.setInterval(moveWorldTitle, 7600);
+
+    const page = document.querySelector(".page");
+    const entries = document.querySelector(".entries");
+    const entryCards = [...document.querySelectorAll(".entry-card")];
+    const welcomePop = document.querySelector(".welcome-pop");
+    let isEntering = false;
+    let activeEntry = null;
+    let scrollTimer = 0;
+    let slideAnimation = 0;
+
+    entryCards.forEach((entry) => {
+      entry.addEventListener("click", () => {
+        if (isEntering) return;
+
+        if (!entry.classList.contains("is-centered")) {
+          centerEntry(entry, 520);
+          return;
+        }
+
+        isEntering = true;
+
+        welcomePop.textContent = entry.dataset.welcome || "Welcome";
+        placeWelcomePop(entry);
+        page.classList.add("is-entering");
+        entry.classList.add("is-entering");
+
+        window.setTimeout(() => {
+          window.location.href = entry.dataset.target;
+        }, 980);
+      });
+    });
+
+    entries.addEventListener("scroll", () => {
+      window.clearTimeout(scrollTimer);
+      updateCenteredEntry();
+      scrollTimer = window.setTimeout(updateCenteredEntry, 90);
+    }, { passive: true });
+
+    window.addEventListener("resize", updateCenteredEntry);
+    window.requestAnimationFrame(() => {
+      updateCenteredEntry();
+    });
+
+    function centerEntry(entry, duration = 780) {
+      window.cancelAnimationFrame(slideAnimation);
+      const track = entries.getBoundingClientRect();
+      const rect = entry.getBoundingClientRect();
+      const start = entries.scrollLeft;
+      const target = start + rect.left + rect.width / 2 - (track.left + track.width / 2);
+      const maxScroll = entries.scrollWidth - entries.clientWidth;
+      const end = Math.max(0, Math.min(maxScroll, target));
+      const startTime = performance.now();
+
+      function step(now) {
+        const progress = Math.min(1, (now - startTime) / duration);
+        const eased = 1 - Math.pow(1 - progress, 3);
+        entries.scrollLeft = start + (end - start) * eased;
+        updateCenteredEntry();
+
+        if (progress < 1) {
+          slideAnimation = window.requestAnimationFrame(step);
+        } else {
+          entries.scrollLeft = end;
+          updateCenteredEntry();
+        }
+      }
+
+      slideAnimation = window.requestAnimationFrame(step);
+    }
+
+    function updateCenteredEntry() {
+      const track = entries.getBoundingClientRect();
+      const trackCenter = track.left + track.width / 2;
+      let closest = entryCards[0];
+      let closestDistance = Infinity;
+
+      entryCards.forEach((entry) => {
+        const rect = entry.getBoundingClientRect();
+        const distance = Math.abs(rect.left + rect.width / 2 - trackCenter);
+        if (distance < closestDistance) {
+          closest = entry;
+          closestDistance = distance;
+        }
+      });
+
+      if (activeEntry === closest) return;
+      activeEntry = closest;
+      entryCards.forEach((entry) => entry.classList.toggle("is-centered", entry === closest));
+    }
+
+    function placeWelcomePop(entry) {
+      const rect = entry.getBoundingClientRect();
+      const x = rect.left + rect.width * 0.5;
+      const y = rect.top + rect.height * 0.18;
+      const safeX = Math.min(window.innerWidth - 16, Math.max(16, x));
+      const safeY = Math.min(window.innerHeight - 16, Math.max(74, y));
+
+      welcomePop.style.setProperty("--pop-left", `${safeX}px`);
+      welcomePop.style.setProperty("--pop-top", `${safeY}px`);
+    }
+  </script>
+</body>
+</html>

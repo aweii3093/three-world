@@ -1,0 +1,591 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Cat World Pointer</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #251f25;
+      --muted: rgba(37, 31, 37, 0.62);
+      --panel: rgba(255, 255, 255, 0.72);
+      --line: rgba(37, 31, 37, 0.1);
+      --pink: #f08aa4;
+      --mint: #8bc8ad;
+      --sun: #f1c85d;
+      --blue: #82aed8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html,
+    body {
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+      background: #858ba0;
+      color: var(--ink);
+      cursor: none;
+    }
+
+    body {
+      isolation: isolate;
+    }
+
+    body::before,
+    body::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+    }
+
+    body::before {
+      inset: -16px;
+      z-index: 0;
+      background-image: url("assets/expanded-art-bg.png");
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      filter: blur(6px) saturate(1.18) contrast(1.06);
+      transform: scale(1.015);
+    }
+
+    body::after {
+      z-index: 1;
+      background:
+        radial-gradient(circle at 50% 50%, rgba(255, 255, 255, 0.06), transparent 36%),
+        linear-gradient(90deg, rgba(12, 13, 17, 0.12), rgba(245, 246, 241, 0.04) 45%, rgba(12, 13, 17, 0.14));
+    }
+
+    .arena {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      height: 100%;
+      overflow: hidden;
+      cursor: none;
+      touch-action: none;
+    }
+
+    .hud {
+      position: fixed;
+      top: 16px;
+      left: 16px;
+      right: 16px;
+      z-index: 30;
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      pointer-events: none;
+    }
+
+    .hud-left {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .chip {
+      min-height: 42px;
+      display: inline-flex;
+      align-items: center;
+      gap: 9px;
+      padding: 8px 12px;
+      border: 1px solid rgba(255, 255, 255, 0.72);
+      border-radius: 8px;
+      background: var(--panel);
+      box-shadow: 0 12px 30px rgba(78, 61, 74, 0.12);
+      backdrop-filter: blur(16px);
+      pointer-events: auto;
+    }
+
+    .chip strong {
+      font-size: 15px;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .chip span {
+      max-width: min(420px, calc(100vw - 48px));
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .back-link {
+      color: var(--ink);
+      text-decoration: none;
+      cursor: none;
+      transition: transform 160ms ease;
+    }
+
+    .back-link:hover {
+      transform: translateY(-1px);
+    }
+
+    .button {
+      appearance: none;
+      border: 0;
+      color: var(--ink);
+      font: inherit;
+      cursor: none;
+    }
+
+    .cat-photo {
+      position: absolute;
+      z-index: 12;
+      overflow: hidden;
+      border: 4px solid rgba(255, 255, 255, 0.9);
+      border-radius: 8px;
+      background: #fff;
+      box-shadow:
+        0 24px 70px rgba(54, 38, 50, 0.22),
+        0 2px 0 rgba(255, 255, 255, 0.78) inset;
+      opacity: 0;
+      transform-origin: var(--mouth-x, 50%) var(--mouth-y, 62%);
+      transform: translateY(8px) scale(0.985);
+      transition:
+        opacity 260ms ease,
+        transform 520ms cubic-bezier(.18, 1.35, .32, 1),
+        filter 260ms ease;
+      will-change: left, top, width, height, transform, opacity;
+      pointer-events: none;
+    }
+
+    .cat-photo.is-visible {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      animation: photoSettle 900ms ease-out both;
+    }
+
+    @keyframes photoSettle {
+      0% {
+        filter: saturate(0.96) brightness(1.03);
+      }
+
+      46% {
+        filter: saturate(1.05) brightness(1.04);
+      }
+
+      100% {
+        filter: saturate(1) brightness(1);
+      }
+    }
+
+    .cat-photo img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      user-select: none;
+      -webkit-user-drag: none;
+      pointer-events: none;
+    }
+
+    .cursor-dot {
+      position: fixed;
+      z-index: 100;
+      width: 38px;
+      height: 38px;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      filter:
+        drop-shadow(0 6px 8px rgba(32, 24, 30, 0.25))
+        drop-shadow(0 0 8px rgba(255, 255, 255, 0.72));
+      transition: transform 160ms ease, filter 160ms ease;
+    }
+
+    .cursor-dot.is-found {
+      transform: translate(-50%, -50%) scale(0.86);
+      filter:
+        drop-shadow(0 4px 6px rgba(32, 24, 30, 0.22))
+        drop-shadow(0 0 10px rgba(240, 138, 164, 0.6));
+    }
+
+    .cursor-dot img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      user-select: none;
+      -webkit-user-drag: none;
+    }
+
+    .pulse {
+      position: absolute;
+      z-index: 11;
+      width: 18px;
+      height: 18px;
+      border-radius: 50%;
+      border: 2px solid rgba(240, 138, 164, 0.5);
+      background: rgba(241, 200, 93, 0.2);
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      animation: pulse 620ms ease-out forwards;
+    }
+
+    .center-tip {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      z-index: 30;
+      max-width: calc(100vw - 32px);
+      padding: 9px 13px;
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      border-radius: 8px;
+      background: rgba(255, 255, 255, 0.68);
+      color: rgba(37, 31, 37, 0.68);
+      font-size: 12px;
+      line-height: 1.35;
+      text-align: center;
+      transform: translateX(-50%);
+      backdrop-filter: blur(14px);
+      pointer-events: none;
+    }
+
+    @keyframes pulse {
+      0% {
+        opacity: 0.9;
+        transform: translate(-50%, -50%) scale(0.4);
+      }
+
+      100% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(5.4);
+      }
+    }
+
+    @media (max-width: 760px) {
+      .hud {
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        flex-direction: column;
+      }
+
+      .chip {
+        min-height: 38px;
+        padding: 7px 10px;
+      }
+
+      .chip strong {
+        font-size: 14px;
+      }
+
+      .chip span {
+        font-size: 11px;
+      }
+
+      .center-tip {
+        bottom: 12px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="arena" id="arena">
+    <div class="cursor-dot" id="cursorDot"></div>
+  </div>
+
+  <div class="hud">
+    <div class="hud-left">
+      <a class="chip back-link" href="aweii-entry-v3.html">
+        <strong>back</strong>
+      </a>
+    </div>
+  </div>
+
+  <div class="center-tip">移动鼠标，然后停住。小猫会更快出现，并在原地多停一会儿。</div>
+
+  <script>
+    const arena = document.getElementById("arena");
+    const cursorDot = document.getElementById("cursorDot");
+
+    const assetRoot = "aweii 网页/cat world/";
+    const headImage = assetRoot + "cat world 入口.png";
+    cursorDot.innerHTML = `<img alt="猫猫光标" src="${encodeURI(headImage)}">`;
+
+    const catImages = [
+      "微信图片_20260730111811_1250_46.jpg",
+      "微信图片_20260730111814_1251_46.jpg",
+      "微信图片_20260730111818_1252_46.jpg",
+      "微信图片_20260730111821_1253_46.jpg",
+      "微信图片_20260730111822_1254_46.jpg",
+      "微信图片_20260730111824_1255_46.jpg",
+      "微信图片_20260730111825_1256_46.jpg",
+      "微信图片_20260730111827_1257_46.jpg",
+      "微信图片_20260730111828_1258_46.jpg",
+      "微信图片_20260730111829_1259_46.jpg",
+      "微信图片_20260730111829_1260_46.jpg",
+      "微信图片_20260730111831_1261_46.jpg",
+      "微信图片_20260730111832_1262_46.jpg",
+      "微信图片_20260730111833_1263_46.jpg",
+      "微信图片_20260730111834_1264_46.jpg",
+      "微信图片_20260730111836_1265_46.jpg",
+      "微信图片_20260730111838_1266_46.jpg",
+      "微信图片_20260730111840_1267_46.jpg",
+      "微信图片_20260730111842_1268_46.jpg",
+      "微信图片_20260730111843_1269_46.jpg",
+      "微信图片_20260730111845_1270_46.jpg",
+      "微信图片_20260730111847_1271_46.jpg",
+      "微信图片_20260730111849_1272_46.jpg",
+      "微信图片_20260730111851_1273_46.jpg",
+      "微信图片_20260730111852_1274_46.jpg",
+      "微信图片_20260730111854_1275_46.jpg",
+      "微信图片_20260730111859_1276_46.jpg",
+      "微信图片_20260730111901_1277_46.jpg",
+      "微信图片_20260730111903_1278_46.jpg",
+      "微信图片_20260730111905_1279_46.jpg",
+      "微信图片_20260730111907_1280_46.jpg",
+      "微信图片_20260730111909_1281_46.jpg",
+      "微信图片_20260730111910_1282_46.jpg",
+      "微信图片_20260730111912_1283_46.jpg",
+      "微信图片_20260730111915_1284_46.jpg",
+      "微信图片_20260730111917_1285_46.jpg",
+      "微信图片_20260730111920_1286_46.jpg",
+      "微信图片_20260730111923_1287_46.jpg",
+      "微信图片_20260730111925_1288_46.jpg",
+      "微信图片_20260730111929_1289_46.jpg",
+      "微信图片_20260730111931_1290_46.jpg",
+      "微信图片_20260730111933_1291_46.jpg",
+      "微信图片_20260730111935_1292_46.jpg",
+      "微信图片_20260730111937_1293_46.jpg",
+      "微信图片_20260730111940_1294_46.jpg",
+      "微信图片_20260730111941_1295_46.jpg",
+      "微信图片_20260730111943_1296_46.jpg",
+      "微信图片_20260730111947_1297_46.jpg",
+      "微信图片_20260730111948_1298_46.jpg",
+      "微信图片_20260730111951_1299_46.jpg",
+      "微信图片_20260730111952_1300_46.jpg",
+      "微信图片_20260730111954_1301_46.jpg",
+      "微信图片_20260730111956_1302_46.jpg",
+      "微信图片_20260730111958_1303_46.jpg",
+      "微信图片_20260730112000_1304_46.jpg",
+      "微信图片_20260730112002_1305_46.jpg",
+      "微信图片_20260730112003_1306_46.jpg",
+      "微信图片_20260730112006_1307_46.jpg",
+      "微信图片_20260730112008_1308_46.jpg",
+      "微信图片_20260730112009_1309_46.jpg",
+      "微信图片_20260730112010_1310_46.jpg",
+      "微信图片_20260730112012_1311_46.jpg",
+      "微信图片_20260730112013_1312_46.jpg",
+      "微信图片_20260730112014_1313_46.jpg",
+      "微信图片_20260730112016_1314_46.jpg",
+      "微信图片_20260730112017_1315_46.jpg",
+      "微信图片_20260730112018_1316_46.jpg",
+      "微信图片_20260730112020_1317_46.jpg",
+      "微信图片_20260730112021_1318_46.jpg",
+      "微信图片_20260730112023_1319_46.jpg",
+      "微信图片_20260730112024_1320_46.jpg",
+      "微信图片_20260730112026_1321_46.jpg",
+      "微信图片_20260730112027_1322_46.jpg",
+      "微信图片_20260730112029_1323_46.jpg",
+      "微信图片_20260730112030_1324_46.jpg",
+      "微信图片_20260730112032_1325_46.jpg",
+      "微信图片_20260730112033_1326_46.jpg",
+      "微信图片_20260730112035_1327_46.jpg",
+      "微信图片_20260730112036_1328_46.jpg",
+      "微信图片_20260730112038_1329_46.jpg",
+      "微信图片_20260730112039_1330_46.jpg",
+      "微信图片_20260730112040_1331_46.jpg",
+      "微信图片_20260730112041_1332_46.jpg",
+      "微信图片_20260730112042_1333_46.jpg",
+      "微信图片_20260730112044_1334_46.jpg",
+      "微信图片_20260730112045_1335_46.jpg",
+      "微信图片_20260730112047_1336_46.jpg",
+      "微信图片_20260730112049_1337_46.jpg",
+      "微信图片_20260730112050_1338_46.jpg",
+      "微信图片_20260730112051_1339_46.jpg",
+      "微信图片_20260730112053_1340_46.jpg",
+      "微信图片_20260730112054_1341_46.jpg",
+      "微信图片_20260730112056_1342_46.jpg",
+      "微信图片_20260730112057_1343_46.jpg",
+      "微信图片_20260730112059_1344_46.jpg",
+      "微信图片_20260730112101_1345_46.jpg",
+      "微信图片_20260730112102_1346_46.jpg",
+      "微信图片_20260730112104_1347_46.jpg",
+      "微信图片_20260730112105_1348_46.jpg"
+    ].map((name) => assetRoot + name);
+
+    const mouthAnchors = [
+      { x: 0.5, y: 0.6 },
+      { x: 0.49, y: 0.63 },
+      { x: 0.52, y: 0.58 },
+      { x: 0.47, y: 0.61 },
+      { x: 0.54, y: 0.62 },
+      { x: 0.5, y: 0.56 }
+    ];
+
+    const state = {
+      x: window.innerWidth * 0.5,
+      y: window.innerHeight * 0.5,
+      count: 0,
+      timer: null,
+      current: null,
+      currentPhoto: null,
+      lastSrc: "",
+      lastShownAt: 0,
+      lastShownX: window.innerWidth * 0.5,
+      lastShownY: window.innerHeight * 0.5
+    };
+
+    function randomBetween(min, max) {
+      return min + Math.random() * (max - min);
+    }
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function pick(items) {
+      return items[Math.floor(Math.random() * items.length)];
+    }
+
+    function imageUrl(src) {
+      return encodeURI(src);
+    }
+
+    function setCursor(x, y) {
+      state.x = x;
+      state.y = y;
+      cursorDot.style.left = `${x}px`;
+      cursorDot.style.top = `${y}px`;
+    }
+
+    function scheduleFind() {
+      window.clearTimeout(state.timer);
+      cursorDot.classList.remove("is-found");
+
+      if (state.currentPhoto) {
+        const now = performance.now();
+        const heldLongEnough = now - state.lastShownAt >= 1000;
+        const movedFarEnough = Math.hypot(state.x - state.lastShownX, state.y - state.lastShownY) >= 72;
+
+        if (!heldLongEnough || !movedFarEnough) return;
+      }
+
+      state.timer = window.setTimeout(showCatAtPointer, 140);
+    }
+
+    function nextImage() {
+      let src = pick(catImages);
+      if (catImages.length > 1) {
+        while (src === state.lastSrc) src = pick(catImages);
+      }
+      state.lastSrc = src;
+      return src;
+    }
+
+    function clearCurrent() {
+      if (!state.current) return;
+      state.current.remove();
+      state.current = null;
+      state.currentPhoto = null;
+    }
+
+    function spawnPulse(x, y) {
+      const pulse = document.createElement("div");
+      pulse.className = "pulse";
+      pulse.style.left = `${x}px`;
+      pulse.style.top = `${y}px`;
+      arena.appendChild(pulse);
+      window.setTimeout(() => pulse.remove(), 650);
+    }
+
+    function showCatAtPointer() {
+      const src = nextImage();
+      const anchor = pick(mouthAnchors);
+      const img = new Image();
+
+      img.onload = () => {
+        clearCurrent();
+
+        const naturalRatio = img.naturalWidth / Math.max(1, img.naturalHeight);
+        const margin = 14;
+        const viewportWidth = window.innerWidth;
+        const viewportHeight = window.innerHeight;
+        const maxByLeft = (state.x - margin) / Math.max(0.08, anchor.x);
+        const maxByRight = (viewportWidth - state.x - margin) / Math.max(0.08, 1 - anchor.x);
+        const maxByTop = (state.y - margin) * naturalRatio / Math.max(0.08, anchor.y);
+        const maxByBottom = (viewportHeight - state.y - margin) * naturalRatio / Math.max(0.08, 1 - anchor.y);
+        const fitWidth = Math.max(90, Math.min(maxByLeft, maxByRight, maxByTop, maxByBottom, viewportWidth - margin * 2));
+        const preferredMin = Math.min(260, Math.max(150, viewportWidth * 0.28));
+        const preferredMax = Math.min(fitWidth, Math.max(preferredMin, viewportWidth * 0.72));
+        let width = randomBetween(Math.min(preferredMin, preferredMax), preferredMax);
+        let height = width / naturalRatio;
+        if (height > viewportHeight - margin * 2) {
+          height = viewportHeight - margin * 2;
+          width = height * naturalRatio;
+        }
+        const left = clamp(state.x - width * anchor.x, margin, viewportWidth - width - margin);
+        const top = clamp(state.y - height * anchor.y, margin, viewportHeight - height - margin);
+
+        const card = document.createElement("div");
+        card.className = "cat-photo";
+        card.style.setProperty("--mouth-x", `${anchor.x * 100}%`);
+        card.style.setProperty("--mouth-y", `${anchor.y * 100}%`);
+        card.style.width = `${width}px`;
+        card.style.height = `${height}px`;
+        card.style.left = `${left}px`;
+        card.style.top = `${top}px`;
+        card.innerHTML = `<img alt="对准鼠标停顿处的猫猫嘴巴" src="${imageUrl(src)}">`;
+
+        arena.appendChild(card);
+        state.current = card;
+        state.currentPhoto = { src, left, top, width, height };
+        state.lastShownAt = performance.now();
+        state.lastShownX = state.x;
+        state.lastShownY = state.y;
+        state.count += 1;
+        cursorDot.classList.add("is-found");
+        spawnPulse(state.x, state.y);
+
+        requestAnimationFrame(() => {
+          card.classList.add("is-visible");
+        });
+      };
+
+      img.onerror = () => {
+        state.timer = window.setTimeout(showCatAtPointer, 120);
+      };
+
+      img.src = imageUrl(src);
+    }
+
+    window.addEventListener("pointermove", (event) => {
+      setCursor(event.clientX, event.clientY);
+      scheduleFind();
+    });
+
+    window.addEventListener("pointerdown", (event) => {
+      setCursor(event.clientX, event.clientY);
+      showCatAtPointer();
+    });
+
+    window.addEventListener("resize", () => {
+      setCursor(
+        Math.min(state.x, window.innerWidth),
+        Math.min(state.y, window.innerHeight)
+      );
+      scheduleFind();
+    });
+
+    catImages.slice(0, 16).forEach((src) => {
+      const img = new Image();
+      img.src = imageUrl(src);
+    });
+
+    setCursor(state.x, state.y);
+    state.timer = window.setTimeout(showCatAtPointer, 160);
+  </script>
+</body>
+</html>

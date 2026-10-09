@@ -1,0 +1,1297 @@
+﻿<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>aweii's world</title>
+  <style>
+    :root {
+      --ink: rgba(245, 246, 241, 0.9);
+      --paper: rgba(245, 246, 241, 0.72);
+      --line: rgba(245, 246, 241, 0.5);
+      --shadow: rgba(5, 6, 10, 0.42);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+      margin: 0;
+    }
+
+    body {
+      font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+      color: var(--ink);
+      background: #858ba0;
+      overflow-x: hidden;
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .world-page {
+      position: relative;
+      min-height: 100svh;
+      padding: clamp(22px, 4vw, 58px);
+      isolation: isolate;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .world-page::before {
+      content: "";
+      position: fixed;
+      inset: -28px;
+      z-index: -3;
+      background-image: url("assets/expanded-art-bg.png");
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      filter: blur(16px) saturate(0.9);
+      transform: scale(1.08);
+    }
+
+    .world-page::after {
+      content: "";
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      background: rgba(9, 10, 14, 0.34);
+      pointer-events: none;
+    }
+
+    .back-link {
+      position: fixed;
+      left: clamp(16px, 3vw, 38px);
+      top: clamp(16px, 3vw, 38px);
+      z-index: 4;
+      min-height: 36px;
+      padding: 0 16px;
+      display: inline-flex;
+      align-items: center;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: var(--ink);
+      background: rgba(8, 8, 11, 0.36);
+      text-decoration: none;
+      backdrop-filter: blur(8px);
+      cursor: pointer;
+    }
+
+    .world-shell {
+      position: relative;
+      width: min(1320px, 100%);
+      margin: 0 auto clamp(44px, 8vh, 96px);
+      min-height: 100svh;
+      display: grid;
+      grid-template-columns: minmax(0, 1.46fr) minmax(300px, 0.62fr);
+      gap: clamp(22px, 3vw, 48px);
+      align-items: center;
+      cursor: pointer;
+    }
+
+    .world-shell:not(.painting-shell):not(.poster-shell):not(.tweet-shell) {
+      order: 2;
+    }
+
+    .poster-shell {
+      order: 1;
+    }
+
+    .painting-shell {
+      order: 3;
+      margin-bottom: 0;
+    }
+
+    .tweet-shell {
+      order: 4;
+      margin-bottom: 0;
+    }
+
+    .world-shell:not(.is-arranged) {
+      grid-template-columns: 1fr;
+    }
+
+    .world-shell + .world-shell {
+      margin-top: 0;
+    }
+
+    .world-shell::after {
+      content: "点击整理";
+      position: absolute;
+      left: 50%;
+      top: min(68svh, 620px);
+      z-index: 20;
+      padding: 6px 14px;
+      color: rgba(245, 246, 241, 0.88);
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(12px, 1.2vw, 16px);
+      text-shadow: 0 2px 14px rgba(0, 0, 0, 0.52);
+      background: rgba(5, 6, 10, 0.26);
+      border: 1px solid rgba(245, 246, 241, 0.2);
+      border-radius: 999px;
+      backdrop-filter: blur(8px);
+      transform: translate(-50%, -50%);
+      transition: opacity 320ms ease;
+      pointer-events: none;
+    }
+
+    .world-shell.is-arranged::after {
+      opacity: 0;
+    }
+
+    .chaos-stage {
+      grid-column: 1 / -1;
+      position: relative;
+      width: min(980px, 100%);
+      min-height: min(760px, 76svh);
+      margin: 0 auto;
+      transform: translateY(64px);
+    }
+
+    .section-title {
+      position: absolute;
+      left: 50%;
+      top: clamp(38px, 7vh, 82px);
+      z-index: 6;
+      margin: 0;
+      color: rgba(245, 246, 241, 0.92);
+      font-size: clamp(24px, 3.4vw, 46px);
+      line-height: 1;
+      font-weight: 400;
+      letter-spacing: 0;
+      text-align: center;
+      text-shadow: 0 4px 22px rgba(0, 0, 0, 0.58);
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+
+    .section-title span {
+      display: block;
+      margin-top: 8px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(12px, 1.05vw, 15px);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: rgba(245, 246, 241, 0.66);
+    }
+
+    .world-shell.is-arranged .chaos-stage {
+      grid-column: auto;
+      width: auto;
+      margin: 0;
+    }
+
+    .piece {
+      position: absolute;
+      width: clamp(230px, 28vw, 410px);
+      aspect-ratio: 4 / 3;
+      margin: 0;
+      border: 1.5px solid rgba(245, 246, 241, 0.48);
+      border-radius: 8px;
+      background: rgba(245, 246, 241, 0.18);
+      box-shadow: 0 24px 54px var(--shadow);
+      overflow: hidden;
+      z-index: var(--layer, 1);
+      transform: translate(var(--scatter-x), var(--scatter-y)) rotate(var(--scatter-r)) scale(var(--scatter-s));
+      transition:
+        transform 2200ms cubic-bezier(0.2, 0.9, 0.18, 1) var(--arrange-delay, 0ms),
+        box-shadow 1100ms ease var(--arrange-delay, 0ms),
+        border-color 1100ms ease var(--arrange-delay, 0ms),
+        filter 1100ms ease var(--arrange-delay, 0ms);
+      animation: paintingChaos var(--float-time) ease-in-out infinite alternate;
+      cursor: default;
+      filter: saturate(1.08) blur(0.2px);
+    }
+
+    .piece img {
+      width: 100%;
+      height: 100%;
+      display: block;
+      object-fit: cover;
+    }
+
+    .world-shell.is-arranged .piece {
+      animation: none;
+      cursor: zoom-in;
+      transform: translate(var(--grid-x), var(--grid-y)) rotate(0deg) scale(1);
+      filter: saturate(1) blur(0);
+    }
+
+    .world-shell.is-measuring .piece {
+      transition: none !important;
+    }
+
+    .piece:hover {
+      border-color: rgba(245, 246, 241, 0.86);
+      box-shadow: 0 28px 70px rgba(0, 0, 0, 0.48);
+    }
+
+    .piece:nth-child(1) {
+      --scatter-x: 20vw;
+      --scatter-y: 0;
+      --scatter-r: -13deg;
+      --scatter-s: 0.82;
+      --drift-x: 30px;
+      --drift-y: -20px;
+      --drift-r: 7deg;
+      --grid-x: 24px;
+      --grid-y: 0;
+      --float-time: 5.8s;
+      --arrange-delay: 0ms;
+      --layer: 2;
+    }
+
+    .piece:nth-child(2) {
+      --scatter-x: 34vw;
+      --scatter-y: 7vh;
+      --scatter-r: 10deg;
+      --scatter-s: 0.78;
+      --drift-x: -34px;
+      --drift-y: 24px;
+      --drift-r: -9deg;
+      --grid-x: 456px;
+      --grid-y: 0;
+      --float-time: 6.4s;
+      --arrange-delay: 120ms;
+      --layer: 3;
+    }
+
+    .piece:nth-child(3) {
+      --scatter-x: 28vw;
+      --scatter-y: 23vh;
+      --scatter-r: 18deg;
+      --scatter-s: 0.8;
+      --drift-x: 26px;
+      --drift-y: -28px;
+      --drift-r: 8deg;
+      --grid-x: 24px;
+      --grid-y: 322px;
+      --float-time: 5.4s;
+      --arrange-delay: 240ms;
+      --layer: 1;
+    }
+
+    .piece:nth-child(4) {
+      --scatter-x: 41vw;
+      --scatter-y: 25vh;
+      --scatter-r: -8deg;
+      --scatter-s: 0.83;
+      --drift-x: -26px;
+      --drift-y: -22px;
+      --drift-r: -8deg;
+      --grid-x: 456px;
+      --grid-y: 322px;
+      --float-time: 6s;
+      --arrange-delay: 360ms;
+      --layer: 4;
+    }
+
+    .painting-shell {
+      grid-template-columns: minmax(0, 1.52fr) minmax(300px, 0.58fr);
+    }
+
+    .painting-shell.is-arranged {
+      grid-template-columns: minmax(300px, 0.58fr) minmax(0, 1.52fr);
+    }
+
+    .painting-shell.is-arranged .description {
+      order: -1;
+    }
+
+    .painting-shell .chaos-stage {
+      min-height: min(800px, 82svh);
+      transform: translateY(44px);
+    }
+
+    .painting-shell .piece {
+      width: clamp(142px, 15vw, 226px);
+      animation-name: paintingChaos;
+      animation-duration: var(--float-time);
+      animation-timing-function: ease-in-out;
+      animation-iteration-count: infinite;
+      animation-direction: alternate;
+    }
+
+    .painting-shell .piece:nth-child(1) {
+      --scatter-x: 13vw;
+      --scatter-y: 2vh;
+      --scatter-r: -18deg;
+      --scatter-s: 1.05;
+      --drift-x: 36px;
+      --drift-y: -18px;
+      --drift-r: 8deg;
+      --grid-x: 20px;
+      --grid-y: 18px;
+      --float-time: 5.4s;
+      --arrange-delay: 0ms;
+      --layer: 4;
+    }
+
+    .painting-shell .piece:nth-child(2) {
+      --scatter-x: 29vw;
+      --scatter-y: 7vh;
+      --scatter-r: 10deg;
+      --scatter-s: 0.92;
+      --drift-x: -32px;
+      --drift-y: 26px;
+      --drift-r: -10deg;
+      --grid-x: 272px;
+      --grid-y: 18px;
+      --float-time: 6.1s;
+      --arrange-delay: 120ms;
+      --layer: 6;
+    }
+
+    .painting-shell .piece:nth-child(3) {
+      --scatter-x: 42vw;
+      --scatter-y: 1vh;
+      --scatter-r: -7deg;
+      --scatter-s: 0.9;
+      --drift-x: 28px;
+      --drift-y: -22px;
+      --drift-r: 9deg;
+      --grid-x: 524px;
+      --grid-y: 18px;
+      --float-time: 5.7s;
+      --arrange-delay: 240ms;
+      --layer: 2;
+    }
+
+    .painting-shell .piece:nth-child(4) {
+      --scatter-x: 9vw;
+      --scatter-y: 22vh;
+      --scatter-r: 14deg;
+      --scatter-s: 0.96;
+      --drift-x: -26px;
+      --drift-y: -18px;
+      --drift-r: -8deg;
+      --grid-x: 20px;
+      --grid-y: 202px;
+      --float-time: 6.3s;
+      --arrange-delay: 360ms;
+      --layer: 7;
+    }
+
+    .painting-shell .piece:nth-child(5) {
+      --scatter-x: 24vw;
+      --scatter-y: 25vh;
+      --scatter-r: -12deg;
+      --scatter-s: 1.02;
+      --drift-x: 30px;
+      --drift-y: 22px;
+      --drift-r: 11deg;
+      --grid-x: 272px;
+      --grid-y: 202px;
+      --float-time: 5.6s;
+      --arrange-delay: 480ms;
+      --layer: 3;
+    }
+
+    .painting-shell .piece:nth-child(6) {
+      --scatter-x: 39vw;
+      --scatter-y: 22vh;
+      --scatter-r: 16deg;
+      --scatter-s: 0.94;
+      --drift-x: -34px;
+      --drift-y: 18px;
+      --drift-r: -12deg;
+      --grid-x: 524px;
+      --grid-y: 202px;
+      --float-time: 6.5s;
+      --arrange-delay: 600ms;
+      --layer: 8;
+    }
+
+    .painting-shell .piece:nth-child(7) {
+      --scatter-x: 18vw;
+      --scatter-y: 40vh;
+      --scatter-r: 9deg;
+      --scatter-s: 0.92;
+      --drift-x: 22px;
+      --drift-y: -28px;
+      --drift-r: 10deg;
+      --grid-x: 20px;
+      --grid-y: 386px;
+      --float-time: 5.9s;
+      --arrange-delay: 720ms;
+      --layer: 1;
+    }
+
+    .painting-shell .piece:nth-child(8) {
+      --scatter-x: 30vw;
+      --scatter-y: 43vh;
+      --scatter-r: -15deg;
+      --scatter-s: 0.98;
+      --drift-x: -28px;
+      --drift-y: 24px;
+      --drift-r: -9deg;
+      --grid-x: 272px;
+      --grid-y: 386px;
+      --float-time: 6.2s;
+      --arrange-delay: 840ms;
+      --layer: 9;
+    }
+
+    .painting-shell .piece:nth-child(9) {
+      --scatter-x: 44vw;
+      --scatter-y: 39vh;
+      --scatter-r: 8deg;
+      --scatter-s: 0.9;
+      --drift-x: 24px;
+      --drift-y: -20px;
+      --drift-r: 7deg;
+      --grid-x: 524px;
+      --grid-y: 386px;
+      --float-time: 5.5s;
+      --arrange-delay: 960ms;
+      --layer: 5;
+    }
+
+    .poster-shell {
+      grid-template-columns: minmax(0, 1.25fr) minmax(300px, 0.72fr);
+    }
+
+    .poster-shell.is-arranged {
+      grid-template-columns: minmax(300px, 0.72fr) minmax(0, 1.25fr);
+    }
+
+    .poster-shell.is-arranged .description {
+      order: -1;
+      align-self: end;
+      padding-bottom: clamp(38px, 8vh, 96px);
+    }
+
+    .poster-shell .chaos-stage {
+      min-height: min(760px, 78svh);
+      transform: translateY(38px);
+    }
+
+    .poster-shell .piece {
+      width: clamp(170px, 18vw, 282px);
+      aspect-ratio: 841 / 1189;
+    }
+
+    .poster-shell .piece img {
+      object-fit: cover;
+    }
+
+    .poster-shell .piece:nth-child(1) {
+      --scatter-x: 20vw;
+      --scatter-y: 5vh;
+      --scatter-r: -10deg;
+      --scatter-s: 0.88;
+      --drift-x: 28px;
+      --drift-y: -22px;
+      --drift-r: 8deg;
+      --grid-x: 20px;
+      --grid-y: 24px;
+      --float-time: 6s;
+      --arrange-delay: 80ms;
+      --layer: 3;
+    }
+
+    .poster-shell .piece:nth-child(2) {
+      --scatter-x: 31vw;
+      --scatter-y: 17vh;
+      --scatter-r: 13deg;
+      --scatter-s: 0.9;
+      --drift-x: -34px;
+      --drift-y: 26px;
+      --drift-r: -10deg;
+      --grid-x: 302px;
+      --grid-y: 24px;
+      --float-time: 5.4s;
+      --arrange-delay: 240ms;
+      --layer: 5;
+    }
+
+    .poster-shell .piece:nth-child(3) {
+      --scatter-x: 25vw;
+      --scatter-y: 32vh;
+      --scatter-r: -6deg;
+      --scatter-s: 0.86;
+      --drift-x: 24px;
+      --drift-y: -28px;
+      --drift-r: 7deg;
+      --grid-x: 584px;
+      --grid-y: 24px;
+      --float-time: 6.4s;
+      --arrange-delay: 400ms;
+      --layer: 1;
+    }
+
+    .poster-shell .piece:nth-child(4) {
+      --scatter-x: 14vw;
+      --scatter-y: 34vh;
+      --scatter-r: 9deg;
+      --scatter-s: 0.88;
+      --drift-x: -30px;
+      --drift-y: 24px;
+      --drift-r: -8deg;
+      --grid-x: 20px;
+      --grid-y: 360px;
+      --float-time: 5.8s;
+      --arrange-delay: 560ms;
+      --layer: 4;
+    }
+
+    .poster-shell .piece:nth-child(5) {
+      --scatter-x: 35vw;
+      --scatter-y: 36vh;
+      --scatter-r: -11deg;
+      --scatter-s: 0.9;
+      --drift-x: 28px;
+      --drift-y: -26px;
+      --drift-r: 9deg;
+      --grid-x: 302px;
+      --grid-y: 360px;
+      --float-time: 6.1s;
+      --arrange-delay: 720ms;
+      --layer: 6;
+    }
+
+    .poster-shell .piece:nth-child(6) {
+      --scatter-x: 48vw;
+      --scatter-y: 31vh;
+      --scatter-r: 7deg;
+      --scatter-s: 0.86;
+      --drift-x: -22px;
+      --drift-y: -18px;
+      --drift-r: -7deg;
+      --grid-x: 584px;
+      --grid-y: 360px;
+      --float-time: 6.6s;
+      --arrange-delay: 880ms;
+      --layer: 2;
+    }
+
+    .tweet-shell {
+      grid-template-columns: minmax(0, 1.08fr) minmax(340px, 0.8fr);
+    }
+
+    .tweet-shell .chaos-stage {
+      min-height: min(760px, 78svh);
+      transform: translateY(38px);
+    }
+
+    .tweet-shell .piece {
+      width: clamp(150px, 14vw, 220px);
+      aspect-ratio: 9 / 25;
+      background: rgba(245, 246, 241, 0.08);
+    }
+
+    .tweet-shell .piece img {
+      object-fit: cover;
+      object-position: top center;
+    }
+
+    .tweet-shell .tweet-pair {
+      width: clamp(240px, 22vw, 350px);
+      aspect-ratio: 18 / 25;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      padding: 10px;
+    }
+
+    .tweet-shell .tweet-pair img {
+      min-width: 0;
+      border-radius: 5px;
+    }
+
+    .tweet-shell .piece:nth-child(1) {
+      --scatter-x: 16vw;
+      --scatter-y: 10vh;
+      --scatter-r: -8deg;
+      --scatter-s: 0.9;
+      --drift-x: 26px;
+      --drift-y: -20px;
+      --drift-r: -6deg;
+      --grid-x: 20px;
+      --grid-y: 24px;
+      --float-time: 6s;
+      --arrange-delay: 120ms;
+      --layer: 2;
+    }
+
+    .tweet-shell .piece:nth-child(2) {
+      --scatter-x: 31vw;
+      --scatter-y: 25vh;
+      --scatter-r: 6deg;
+      --scatter-s: 0.9;
+      --drift-x: -24px;
+      --drift-y: 22px;
+      --drift-r: 4deg;
+      --grid-x: 228px;
+      --grid-y: 26px;
+      --float-time: 6.5s;
+      --arrange-delay: 300ms;
+      --layer: 4;
+    }
+
+    .tweet-shell .piece:nth-child(3) {
+      --scatter-x: 52vw;
+      --scatter-y: 13vh;
+      --scatter-r: 9deg;
+      --scatter-s: 0.86;
+      --drift-x: 24px;
+      --drift-y: -26px;
+      --drift-r: 7deg;
+      --grid-x: 600px;
+      --grid-y: 24px;
+      --float-time: 5.8s;
+      --arrange-delay: 480ms;
+      --layer: 3;
+    }
+
+    .tweet-shell.is-arranged .description {
+      padding-left: clamp(74px, 8vw, 132px);
+    }
+
+    .description {
+      align-self: center;
+      max-width: 380px;
+      padding: 22px 0;
+      color: rgba(245, 246, 241, 0.88);
+      text-shadow: 0 2px 14px rgba(0, 0, 0, 0.42);
+      position: absolute;
+      right: 0;
+      width: min(380px, 36vw);
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(18px);
+      transition: opacity 620ms ease 760ms, transform 620ms ease 760ms;
+      pointer-events: none;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .world-shell.is-arranged .description {
+      position: relative;
+      right: auto;
+      width: auto;
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0);
+      pointer-events: auto;
+    }
+
+    .description h1 {
+      margin: 0 0 18px;
+      font-size: clamp(24px, 3.2vw, 40px);
+      line-height: 1;
+      letter-spacing: 0;
+      font-weight: 400;
+    }
+
+    .description p {
+      margin: 0 0 12px;
+      font-family: Georgia, "Times New Roman", serif;
+      font-size: clamp(13px, 1.05vw, 16px);
+      line-height: 1.48;
+      order: 2;
+    }
+
+    .description p:not(.zh) {
+      display: none;
+    }
+
+    .description .zh {
+      margin: 0 0 14px;
+      font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+      font-size: clamp(13px, 1vw, 15px);
+      line-height: 1.72;
+      color: rgba(245, 246, 241, 0.86);
+      order: 1;
+    }
+
+    .hint {
+      margin-top: 20px;
+      font-family: "Microsoft YaHei", "PingFang SC", Arial, sans-serif;
+      font-size: 12px;
+      line-height: 1.72;
+      letter-spacing: 0;
+      color: rgba(245, 246, 241, 0.58);
+      order: 3;
+    }
+
+    .lightbox {
+      position: fixed;
+      inset: 0;
+      z-index: 9;
+      display: none;
+      place-items: center;
+      padding: clamp(20px, 4vw, 48px);
+      background: rgba(7, 8, 11, 0.72);
+      backdrop-filter: blur(12px);
+      cursor: zoom-out;
+    }
+
+    .lightbox.is-open {
+      display: grid;
+    }
+
+    .lightbox img {
+      max-width: min(94vw, 1120px);
+      max-height: 88svh;
+      border: 1px solid rgba(245, 246, 241, 0.48);
+      border-radius: 8px;
+      box-shadow: 0 28px 70px rgba(0, 0, 0, 0.52);
+    }
+
+    @keyframes floatPiece {
+      from {
+        margin-top: -10px;
+      }
+
+      to {
+        margin-top: 12px;
+      }
+    }
+
+    @keyframes paintingChaos {
+      from {
+        transform: translate(var(--scatter-x), var(--scatter-y)) rotate(var(--scatter-r)) scale(var(--scatter-s));
+      }
+
+      to {
+        transform:
+          translate(
+            calc(var(--scatter-x) + var(--drift-x)),
+            calc(var(--scatter-y) + var(--drift-y))
+          )
+          rotate(calc(var(--scatter-r) + var(--drift-r)))
+          scale(calc(var(--scatter-s) + 0.03));
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      .piece,
+      .painting-shell .piece {
+        animation: none;
+      }
+    }
+
+    @media (max-width: 860px) {
+      .world-page {
+        padding: 78px 16px 32px;
+      }
+
+      .world-shell {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        min-height: auto;
+        margin-bottom: 48px;
+      }
+
+      .world-shell::after {
+        top: 330px;
+      }
+
+      .chaos-stage {
+        min-height: 320px;
+        transform: translateY(0);
+      }
+
+      .piece {
+        width: min(43vw, 168px);
+      }
+
+      .piece:nth-child(1) {
+        --scatter-x: 3vw;
+        --scatter-y: 0;
+        --grid-x: 0;
+        --grid-y: 18px;
+      }
+
+      .piece:nth-child(2) {
+        --scatter-x: 45vw;
+        --scatter-y: 8px;
+        --grid-x: calc(47vw - 2px);
+        --grid-y: 18px;
+      }
+
+      .piece:nth-child(3) {
+        --scatter-x: 4vw;
+        --scatter-y: 154px;
+        --grid-x: 0;
+        --grid-y: 160px;
+      }
+
+      .piece:nth-child(4) {
+        --scatter-x: 45vw;
+        --scatter-y: 162px;
+        --grid-x: calc(47vw - 2px);
+        --grid-y: 160px;
+      }
+
+      .painting-shell .chaos-stage {
+        min-height: 360px;
+        transform: translateY(0);
+      }
+
+      .painting-shell .piece {
+        width: min(28vw, 104px);
+      }
+
+      .painting-shell .piece:nth-child(1),
+      .painting-shell .piece:nth-child(4),
+      .painting-shell .piece:nth-child(7) {
+        --grid-x: 0;
+      }
+
+      .painting-shell .piece:nth-child(2),
+      .painting-shell .piece:nth-child(5),
+      .painting-shell .piece:nth-child(8) {
+        --grid-x: calc(32vw - 6px);
+      }
+
+      .painting-shell .piece:nth-child(3),
+      .painting-shell .piece:nth-child(6),
+      .painting-shell .piece:nth-child(9) {
+        --grid-x: calc(64vw - 12px);
+      }
+
+      .painting-shell .piece:nth-child(1),
+      .painting-shell .piece:nth-child(2),
+      .painting-shell .piece:nth-child(3) {
+        --grid-y: 18px;
+      }
+
+      .painting-shell .piece:nth-child(4),
+      .painting-shell .piece:nth-child(5),
+      .painting-shell .piece:nth-child(6) {
+        --grid-y: 142px;
+      }
+
+      .painting-shell .piece:nth-child(7),
+      .painting-shell .piece:nth-child(8),
+      .painting-shell .piece:nth-child(9) {
+        --grid-y: 266px;
+      }
+
+      .painting-shell .piece:nth-child(1) {
+        --scatter-x: 3vw;
+        --scatter-y: 0;
+      }
+
+      .painting-shell .piece:nth-child(2) {
+        --scatter-x: 34vw;
+        --scatter-y: 14px;
+      }
+
+      .painting-shell .piece:nth-child(3) {
+        --scatter-x: 63vw;
+        --scatter-y: 4px;
+      }
+
+      .painting-shell .piece:nth-child(4) {
+        --scatter-x: 7vw;
+        --scatter-y: 128px;
+      }
+
+      .painting-shell .piece:nth-child(5) {
+        --scatter-x: 37vw;
+        --scatter-y: 140px;
+      }
+
+      .painting-shell .piece:nth-child(6) {
+        --scatter-x: 62vw;
+        --scatter-y: 120px;
+      }
+
+      .painting-shell .piece:nth-child(7) {
+        --scatter-x: 4vw;
+        --scatter-y: 260px;
+      }
+
+      .painting-shell .piece:nth-child(8) {
+        --scatter-x: 35vw;
+        --scatter-y: 248px;
+      }
+
+      .painting-shell .piece:nth-child(9) {
+        --scatter-x: 64vw;
+        --scatter-y: 268px;
+      }
+
+      .poster-shell.is-arranged,
+      .painting-shell.is-arranged,
+      .tweet-shell.is-arranged {
+        grid-template-columns: 1fr;
+      }
+
+      .poster-shell.is-arranged .description,
+      .painting-shell.is-arranged .description,
+      .tweet-shell.is-arranged .description {
+        order: 0;
+        padding-bottom: 0;
+      }
+
+      .poster-shell .chaos-stage {
+        min-height: 430px;
+        transform: translateY(0);
+      }
+
+      .poster-shell .piece {
+        width: min(28vw, 118px);
+      }
+
+      .poster-shell .piece:nth-child(1) {
+        --scatter-x: 10vw;
+        --scatter-y: 26px;
+        --grid-x: 0;
+        --grid-y: 28px;
+      }
+
+      .poster-shell .piece:nth-child(2) {
+        --scatter-x: 38vw;
+        --scatter-y: 105px;
+        --grid-x: calc(32vw - 2px);
+        --grid-y: 28px;
+      }
+
+      .poster-shell .piece:nth-child(3) {
+        --scatter-x: 20vw;
+        --scatter-y: 220px;
+        --grid-x: calc(64vw - 4px);
+        --grid-y: 28px;
+      }
+
+      .poster-shell .piece:nth-child(4) {
+        --scatter-x: 5vw;
+        --scatter-y: 318px;
+        --grid-x: 0;
+        --grid-y: 218px;
+      }
+
+      .poster-shell .piece:nth-child(5) {
+        --scatter-x: 34vw;
+        --scatter-y: 360px;
+        --grid-x: calc(32vw - 2px);
+        --grid-y: 218px;
+      }
+
+      .poster-shell .piece:nth-child(6) {
+        --scatter-x: 58vw;
+        --scatter-y: 316px;
+        --grid-x: calc(64vw - 4px);
+        --grid-y: 218px;
+      }
+
+      .tweet-shell .chaos-stage {
+        min-height: 420px;
+        transform: translateY(0);
+      }
+
+      .tweet-shell .piece {
+        width: min(27vw, 108px);
+      }
+
+      .tweet-shell .tweet-pair {
+        width: min(48vw, 190px);
+        gap: 6px;
+        padding: 6px;
+      }
+
+      .tweet-shell .piece:nth-child(1) {
+        --scatter-x: 4vw;
+        --scatter-y: 34px;
+        --grid-x: 0;
+        --grid-y: 24px;
+      }
+
+      .tweet-shell .piece:nth-child(2) {
+        --scatter-x: 28vw;
+        --scatter-y: 160px;
+        --grid-x: calc(28vw - 8px);
+        --grid-y: 22px;
+      }
+
+      .tweet-shell .piece:nth-child(3) {
+        --scatter-x: 67vw;
+        --scatter-y: 46px;
+        --grid-x: calc(78vw - 108px);
+        --grid-y: 24px;
+      }
+
+      .tweet-shell.is-arranged .description {
+        padding-left: 0;
+      }
+
+      .description {
+        max-width: none;
+        width: auto;
+        padding: 0;
+      }
+
+      .description h1 {
+        margin-bottom: 14px;
+        font-size: 28px;
+      }
+
+      .description p {
+        font-size: 13px;
+        line-height: 1.5;
+      }
+
+      .description .zh {
+        font-size: 12px;
+        line-height: 1.65;
+      }
+
+      .hint {
+        margin-top: 14px;
+        font-size: 10px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="world-page">
+    <a class="back-link" href="aweii-entry-v3.html">返回</a>
+
+    <section class="world-shell">
+      <div class="chaos-stage" aria-label="interactive artwork layout">
+        <figure class="piece">
+          <img src="assets/world-sculpt-01.png" alt="Ginseng fruit">
+        </figure>
+        <figure class="piece">
+          <img src="assets/world-sculpt-02.png" alt="Twisted sun">
+        </figure>
+        <figure class="piece">
+          <img src="assets/world-sculpt-03.png" alt="Fake landscape">
+        </figure>
+        <figure class="piece">
+          <img src="assets/world-sculpt-04.png" alt="Girl's Wing">
+        </figure>
+      </div>
+
+      <article class="description">
+        <h1>02 捏画</h1>
+        <p class="zh">
+          这一组是我用雕塑软件和平面设计软件一起完成的。我想做一些介于玩具、图标、生物和梦之间的小物件：有眼睛的人参果、像融化花朵一样的太阳、轻飘飘的假山水，还有长出机械翅膀的女孩。我喜欢让可爱的东西带一点不安，也想保留它们“被我捏出来”的人工感。
+        </p>
+        <div class="hint">下滑查看其他内容</div>
+      </article>
+    </section>
+
+    <section class="world-shell painting-shell">
+      <div class="chaos-stage" aria-label="interactive painting layout">
+        <figure class="piece">
+          <img src="assets/world-paint-01.png" alt="Two figures with speech bubbles">
+        </figure>
+        <figure class="piece">
+          <img src="assets/world-paint-02.jpg" alt="Pages with heart messages">
+        </figure>
+        <figure class="piece">
+          <img src="assets/world-paint-03.png" alt="Close-up neon face">
+        </figure>
+        <figure class="piece">
+          <img src="assets/world-paint-04.png" alt="Graphic figures and icons">
+        </figure>
+        <figure class="piece">
+          <img src="assets/world-paint-05.png" alt="Orange-haired figure in dark flowers">
+        </figure>
+        <figure class="piece">
+          <img src="assets/world-paint-06.jpg" alt="Blue night with birds">
+        </figure>
+        <figure class="piece">
+          <img src="assets/world-paint-07.jpg" alt="Gradient landscape with figures">
+        </figure>
+        <figure class="piece">
+          <img src="assets/world-paint-08.jpg" alt="Yellow sky with blue birds and lightning">
+        </figure>
+        <figure class="piece">
+          <img src="assets/world-paint-09.jpg" alt="Blue numbered shapes and stars">
+        </figure>
+      </div>
+
+      <article class="description">
+        <h1>03 绘画</h1>
+        <p class="zh">
+          这一组更像我的日常视觉记录。我用很亮的数码颜色、粗黑线条、聊天气泡、爱心、飞鸟、闪电和人物，把一些还没完全说清楚的情绪先画下来。有些画来自被消息和关注包围的感觉，有些来自我反复画的脸、天空和想象风景。我不想让线条太干净，粗糙、发光和涂写感对我来说很重要，它们让画面像一篇突然被放到屏幕上的私人日记。
+        </p>
+      </article>
+    </section>
+
+    <section class="world-shell poster-shell">
+      <div class="chaos-stage" aria-label="interactive poster layout">
+        <figure class="piece">
+          <img src="assets/world-poster-01.jpg" alt="Blue exhibition poster">
+        </figure>
+        <figure class="piece">
+          <img src="assets/world-poster-02.png" alt="Poster with seagull and bold text">
+        </figure>
+        <figure class="piece">
+          <img src="assets/world-poster-03.png" alt="Red portrait collage poster">
+        </figure>
+        <figure class="piece">
+          <img src="assets/dcf2719a8c4bb749c387dac7c0fc6877.png" alt="Black and white character poster">
+        </figure>
+        <figure class="piece">
+          <img src="assets/1f60850b01542447af673fee999485c2.png" alt="Black blue landscape poster">
+        </figure>
+        <figure class="piece">
+          <img src="assets/c1c5d31fd949696c7b4c71b466e1f545.png" alt="Green figure poster">
+        </figure>
+      </div>
+
+      <article class="description">
+        <h1>01 海报</h1>
+        <p class="zh">
+          做海报时，我会把页面当成一个可以堆叠的舞台，把文字、拼贴、扫描颗粒、手绘线条和高饱和颜色放在一起。我喜欢海报既能传达信息，也能制造一种气氛，像一张被反复涂写、覆盖、又重新发光的图像。
+        </p>
+        <div class="hint">下滑查看其他内容</div>
+      </article>
+    </section>
+
+    <section class="world-shell tweet-shell">
+      <div class="chaos-stage" aria-label="interactive tweet layout">
+        <figure class="piece">
+          <img src="assets/5f247dd5b016a806546e09f176819d76.jpg" alt="Egg and flower process tweet">
+        </figure>
+        <figure class="piece tweet-pair">
+          <img src="assets/fe4ebd728827942f7148600e7dca60b0.png" alt="Blue and pink tweet page one">
+          <img src="assets/c5a0a078b65e37ada95dba36978b646c.png" alt="Blue and pink tweet page two">
+        </figure>
+        <figure class="piece">
+          <img src="assets/ca4d3a7573f7e3c88160ae4402b0dd3d.png" alt="Black recording style tweet">
+        </figure>
+      </div>
+
+      <article class="description">
+        <h1>04 推文</h1>
+        <p class="zh">
+          这一组更像把创作过程整理成沉浸的灵感收集世界。里面有材料拆解、阶段记录、粉丝图像、手绘小物和碎片化的文字说明；有些像教程，有些像日记，也有些像把一段时间的灵感贴在同一张纸上。
+        </p>
+      </article>
+    </section>
+  </main>
+
+  <div class="lightbox" aria-hidden="true">
+    <img src="" alt="">
+  </div>
+
+  <script>
+    const shells = document.querySelectorAll(".world-shell");
+    const lightbox = document.querySelector(".lightbox");
+    const lightboxImage = lightbox.querySelector("img");
+
+    document.querySelectorAll(".world-shell").forEach((shell) => {
+      const key = shell.classList.contains("poster-shell")
+        ? "poster-shell"
+        : shell.classList.contains("painting-shell")
+          ? "painting-shell"
+          : shell.classList.contains("tweet-shell")
+            ? "tweet-shell"
+            : "sculpt-shell";
+      const title = shell.querySelector(".description h1");
+      const titleCopy = {
+        "poster-shell": "01 海报",
+        "sculpt-shell": "02 捏画",
+        "painting-shell": "03 绘画",
+        "tweet-shell": "04 推文"
+      };
+      if (title) {
+        title.textContent = titleCopy[key];
+      }
+    });
+
+    shells.forEach((shell) => {
+      shell.addEventListener("click", (event) => {
+        const piece = event.target.closest(".piece");
+
+        if (piece && shell.classList.contains("is-arranged")) {
+          const image = event.target.closest("img") || piece.querySelector("img");
+          lightboxImage.src = image.src;
+          lightboxImage.alt = image.alt;
+          lightbox.classList.add("is-open");
+          lightbox.setAttribute("aria-hidden", "false");
+          return;
+        }
+
+        if (shell.classList.contains("is-arranged")) {
+          piecesIn(shell).forEach((item) => item.getAnimations().forEach((animation) => animation.cancel()));
+          shell.classList.remove("is-arranged");
+          return;
+        }
+
+        arrangeShell(shell);
+      });
+    });
+
+    function arrangeShell(shell) {
+      const pieces = piecesIn(shell);
+      const startRects = pieces.map((piece) => piece.getBoundingClientRect());
+
+      shell.classList.add("is-measuring");
+      shell.classList.add("is-arranged");
+      shell.offsetHeight;
+
+      pieces.forEach((piece, index) => {
+        piece.getAnimations().forEach((animation) => animation.cancel());
+        const endRect = piece.getBoundingClientRect();
+        const startRect = startRects[index];
+        const finalTransform = getComputedStyle(piece).transform === "none" ? "" : getComputedStyle(piece).transform;
+        const deltaX = startRect.left - endRect.left;
+        const deltaY = startRect.top - endRect.top;
+        const arcX = (index % 2 === 0 ? -1 : 1) * (26 + index * 4);
+        const arcY = (index % 3 === 0 ? -1 : 1) * (18 + index * 3);
+        const twist = (index % 2 === 0 ? -1 : 1) * (4 + index * 0.7);
+        const delay = index * (shell.classList.contains("painting-shell") ? 110 : 150);
+        const duration = 1900 + index * 70;
+
+        piece.animate([
+          {
+            transform: `translate(${deltaX}px, ${deltaY}px) rotate(${twist}deg) scale(1.03) ${finalTransform}`,
+            offset: 0
+          },
+          {
+            transform: `translate(${deltaX * 0.46 + arcX}px, ${deltaY * 0.46 + arcY}px) rotate(${-twist * 0.55}deg) scale(0.985) ${finalTransform}`,
+            offset: 0.58
+          },
+          {
+            transform: `translate(0, 0) rotate(0deg) scale(1.012) ${finalTransform}`,
+            offset: 0.86
+          },
+          {
+            transform: finalTransform,
+            offset: 1
+          }
+        ], {
+          duration,
+          delay,
+          easing: "cubic-bezier(0.18, 0.82, 0.22, 1)",
+          fill: "both"
+        });
+      });
+
+      shell.classList.remove("is-measuring");
+    }
+
+    function piecesIn(shell) {
+      return [...shell.querySelectorAll(".piece")];
+    }
+
+    function closeLightbox() {
+      lightbox.classList.remove("is-open");
+      lightbox.setAttribute("aria-hidden", "true");
+      lightboxImage.src = "";
+    }
+
+    lightbox.addEventListener("click", closeLightbox);
+    window.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        closeLightbox();
+      }
+    });
+  </script>
+</body>
+</html>
