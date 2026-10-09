@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
@@ -19,7 +19,7 @@
       min-height: 100svh;
       font-family: Arial, "Microsoft YaHei", "PingFang SC", sans-serif;
       color: rgba(245, 246, 241, 0.9);
-      background: #858ba0 url("assets/expanded-art-bg.webp") center / cover fixed no-repeat;
+      background: #858ba0;
       overflow: hidden;
     }
 
@@ -30,19 +30,20 @@
       place-items: center;
       padding: clamp(22px, 5vw, 72px);
       isolation: isolate;
-      background: url("assets/expanded-art-bg.webp") center / cover no-repeat;
+      background: transparent;
     }
 
     .background-art {
       position: fixed;
-      inset: -24px;
+      inset: 0;
       z-index: 0;
-      width: calc(100% + 48px);
-      height: calc(100% + 48px);
+      width: 100%;
+      height: 100%;
       object-fit: cover;
       object-position: center;
-      filter: saturate(0.96);
-      transform: scale(1.04);
+      filter: saturate(0.98) contrast(1.02);
+      transform: none;
+      opacity: 1;
       pointer-events: none;
       user-select: none;
     }
@@ -52,7 +53,7 @@
       position: fixed;
       inset: -24px;
       z-index: 0;
-      background-image: url("assets/expanded-art-bg.webp");
+      background-image: url("assets/expanded-art-bg.png");
       background-position: center;
       background-size: cover;
       background-repeat: no-repeat;
@@ -67,8 +68,8 @@
       inset: 0;
       z-index: 1;
       background:
-        radial-gradient(circle at 50% 48%, rgba(245, 246, 241, 0.04), transparent 34%),
-        linear-gradient(90deg, rgba(9, 10, 14, 0.18), rgba(9, 10, 14, 0.02) 34%, rgba(9, 10, 14, 0.14));
+        radial-gradient(circle at 50% 48%, rgba(245, 246, 241, 0.03), transparent 34%),
+        linear-gradient(90deg, rgba(9, 10, 14, 0.08), rgba(9, 10, 14, 0.01) 34%, rgba(9, 10, 14, 0.08));
       pointer-events: none;
     }
 
@@ -123,12 +124,22 @@
       touch-action: pan-x;
       scroll-snap-align: center;
       filter:
-        brightness(0.52)
         drop-shadow(0 0 8px rgba(245, 246, 241, 0.14))
         drop-shadow(0 26px 28px rgba(0, 0, 0, 0.35));
       animation: floatEntry 6.2s ease-in-out infinite;
-      opacity: 0.62;
-      transition: filter 240ms ease, opacity 240ms ease, transform 240ms ease;
+      opacity: 1;
+      transition: filter 240ms ease, transform 240ms ease;
+    }
+
+    .entry-card::after {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: 2;
+      background: rgba(9, 10, 14, 0.42);
+      border-radius: 12px;
+      pointer-events: none;
+      transition: opacity 240ms ease;
     }
 
     .entry-card.work {
@@ -151,6 +162,10 @@
         drop-shadow(0 0 34px rgba(245, 246, 241, 0.24))
         drop-shadow(0 28px 30px rgba(0, 0, 0, 0.38));
       transform: translateY(-2px);
+    }
+
+    .entry-card.is-centered::after {
+      opacity: 0;
     }
 
     .entry-card:hover,
@@ -182,6 +197,7 @@
       object-position: center;
       pointer-events: none;
       user-select: none;
+      z-index: 1;
     }
 
     .hold-badge {
@@ -373,7 +389,7 @@
 </head>
 <body>
   <main class="page">
-    <img class="background-art" src="assets/expanded-art-bg.webp" alt="">
+    <img class="background-art" src="assets/expanded-art-bg.png" alt="">
     <img class="world-title" src="homepage-overlay.png" alt="">
     <section class="entries" aria-label="world entries">
       <button class="entry-card work" type="button" data-target="work.html" data-welcome="welcome to aweii's work world" aria-label="Click to enter work">
@@ -514,4 +530,3 @@
   </script>
 </body>
 </html>
-
