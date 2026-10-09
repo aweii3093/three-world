@@ -131,17 +131,6 @@
       transition: filter 240ms ease, transform 240ms ease;
     }
 
-    .entry-card::after {
-      content: "";
-      position: absolute;
-      inset: 0;
-      z-index: 2;
-      background: rgba(9, 10, 14, 0.42);
-      border-radius: 12px;
-      pointer-events: none;
-      transition: opacity 240ms ease;
-    }
-
     .entry-card.work {
       animation-delay: 0s;
     }
@@ -162,10 +151,6 @@
         drop-shadow(0 0 34px rgba(245, 246, 241, 0.24))
         drop-shadow(0 28px 30px rgba(0, 0, 0, 0.38));
       transform: translateY(-2px);
-    }
-
-    .entry-card.is-centered::after {
-      opacity: 0;
     }
 
     .entry-card:hover,
@@ -198,6 +183,16 @@
       pointer-events: none;
       user-select: none;
       z-index: 1;
+      opacity: 0.58;
+      filter: brightness(0.72);
+      transition: opacity 240ms ease, filter 240ms ease;
+    }
+
+    .entry-card.is-centered img,
+    .entry-card:hover img,
+    .entry-card:focus-visible img {
+      opacity: 1;
+      filter: brightness(1);
     }
 
     .hold-badge {
