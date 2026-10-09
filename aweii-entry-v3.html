@@ -32,6 +32,20 @@
       isolation: isolate;
     }
 
+    .background-art {
+      position: fixed;
+      inset: -24px;
+      z-index: 0;
+      width: calc(100% + 48px);
+      height: calc(100% + 48px);
+      object-fit: cover;
+      object-position: center;
+      filter: saturate(0.96);
+      transform: scale(1.04);
+      pointer-events: none;
+      user-select: none;
+    }
+
     .page::before {
       content: "";
       position: fixed;
@@ -43,6 +57,7 @@
       background-repeat: no-repeat;
       filter: saturate(0.9);
       transform: scale(1.04);
+      display: none;
     }
 
     .page::after {
@@ -357,6 +372,7 @@
 </head>
 <body>
   <main class="page">
+    <img class="background-art" src="assets/expanded-art-bg.png" alt="">
     <img class="world-title" src="homepage-overlay.png" alt="">
     <section class="entries" aria-label="world entries">
       <button class="entry-card work" type="button" data-target="work.html" data-welcome="welcome to aweii's work world" aria-label="Click to enter work">
