@@ -576,8 +576,9 @@
     }
 
     .tweet-shell.is-arranged {
-      grid-template-columns: 1fr;
-      align-items: start;
+      grid-template-columns: minmax(0, 1.08fr) minmax(340px, 0.8fr);
+      column-gap: clamp(72px, 7vw, 128px);
+      align-items: center;
     }
 
     .tweet-shell .chaos-stage {
@@ -586,11 +587,16 @@
     }
 
     .tweet-shell.is-arranged .chaos-stage {
-      grid-column: 1;
-      width: min(980px, 100%);
-      min-height: min(760px, 78svh);
-      margin: 0 auto;
+      grid-column: auto;
+      width: auto;
+      min-height: auto;
+      margin: 0;
       transform: translateY(0);
+      display: grid;
+      grid-template-columns: repeat(3, clamp(150px, 14vw, 220px));
+      gap: clamp(30px, 4vw, 72px);
+      justify-content: center;
+      align-items: start;
     }
 
     .tweet-shell .piece {
@@ -605,16 +611,20 @@
     }
 
     .tweet-shell .tweet-pair {
-      width: clamp(240px, 22vw, 350px);
-      aspect-ratio: 18 / 25;
+      width: clamp(150px, 14vw, 220px);
+      aspect-ratio: 9 / 25;
       display: grid;
-      grid-template-columns: 1fr 1fr;
+      grid-template-columns: 1fr;
+      grid-template-rows: 1fr 1fr;
       gap: 10px;
       padding: 10px;
     }
 
     .tweet-shell .tweet-pair img {
       min-width: 0;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
       border-radius: 5px;
     }
 
@@ -641,7 +651,7 @@
       --drift-x: -24px;
       --drift-y: 22px;
       --drift-r: 4deg;
-      --grid-x: 228px;
+      --grid-x: 292px;
       --grid-y: 26px;
       --float-time: 6.5s;
       --arrange-delay: 300ms;
@@ -656,7 +666,7 @@
       --drift-x: 24px;
       --drift-y: -26px;
       --drift-r: 7deg;
-      --grid-x: 600px;
+      --grid-x: 550px;
       --grid-y: 24px;
       --float-time: 5.8s;
       --arrange-delay: 480ms;
@@ -664,10 +674,18 @@
     }
 
     .tweet-shell.is-arranged .description {
-      width: min(720px, 100%);
-      max-width: 720px;
-      margin: clamp(22px, 4vh, 48px) auto 0;
+      width: auto;
+      max-width: 420px;
+      margin: 0;
       padding-left: 0;
+    }
+
+    .tweet-shell.is-arranged .piece,
+    .tweet-shell.is-arranged .tweet-pair {
+      position: relative;
+      inset: auto;
+      width: 100%;
+      transform: none;
     }
 
     .description {
@@ -762,8 +780,10 @@
       box-shadow: 0 28px 70px rgba(0, 0, 0, 0.52);
       transform: scale(var(--zoom, 1));
       transform-origin: center;
-      transition: transform 180ms ease;
+      transition: none;
       cursor: grab;
+      will-change: transform;
+      contain: paint;
     }
 
     .lightbox-controls {
@@ -833,7 +853,7 @@
         grid-template-columns: 1fr;
         gap: 10px;
         min-height: auto;
-        margin-bottom: 48px;
+        margin-bottom: clamp(92px, 14vh, 150px);
       }
 
       .world-shell::after {
@@ -841,8 +861,12 @@
       }
 
       .chaos-stage {
-        min-height: 320px;
+        min-height: 390px;
         transform: translateY(0);
+      }
+
+      .world-shell.is-arranged .chaos-stage {
+        min-height: 360px;
       }
 
       .piece {
@@ -878,8 +902,12 @@
       }
 
       .painting-shell .chaos-stage {
-        min-height: 360px;
+        min-height: 430px;
         transform: translateY(0);
+      }
+
+      .painting-shell.is-arranged .chaos-stage {
+        min-height: 390px;
       }
 
       .painting-shell .piece {
@@ -975,7 +1003,13 @@
 
       .tweet-shell.is-arranged .chaos-stage {
         order: 1;
-        min-height: 430px;
+        min-height: auto;
+        width: 100%;
+        margin: 0 auto;
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+        justify-content: center;
       }
 
       .poster-shell.is-arranged .description,
@@ -986,13 +1020,18 @@
 
       .tweet-shell.is-arranged .description {
         order: 2;
-        margin-top: 18px;
+        margin-top: 28px;
+        max-width: none;
         padding-bottom: 0;
       }
 
       .poster-shell .chaos-stage {
-        min-height: 430px;
+        min-height: 540px;
         transform: translateY(0);
+      }
+
+      .poster-shell.is-arranged .chaos-stage {
+        min-height: 430px;
       }
 
       .poster-shell .piece {
@@ -1001,57 +1040,60 @@
 
       .poster-shell .piece:nth-child(1) {
         --scatter-x: 10vw;
-        --scatter-y: 26px;
+        --scatter-y: 8px;
         --grid-x: 0;
         --grid-y: 28px;
       }
 
       .poster-shell .piece:nth-child(2) {
         --scatter-x: 38vw;
-        --scatter-y: 105px;
+        --scatter-y: 82px;
         --grid-x: calc(32vw - 2px);
         --grid-y: 28px;
       }
 
       .poster-shell .piece:nth-child(3) {
         --scatter-x: 20vw;
-        --scatter-y: 220px;
+        --scatter-y: 176px;
         --grid-x: calc(64vw - 4px);
         --grid-y: 28px;
       }
 
       .poster-shell .piece:nth-child(4) {
         --scatter-x: 5vw;
-        --scatter-y: 318px;
+        --scatter-y: 262px;
         --grid-x: 0;
         --grid-y: 218px;
       }
 
       .poster-shell .piece:nth-child(5) {
         --scatter-x: 34vw;
-        --scatter-y: 360px;
+        --scatter-y: 306px;
         --grid-x: calc(32vw - 2px);
         --grid-y: 218px;
       }
 
       .poster-shell .piece:nth-child(6) {
         --scatter-x: 58vw;
-        --scatter-y: 316px;
+        --scatter-y: 260px;
         --grid-x: calc(64vw - 4px);
         --grid-y: 218px;
       }
 
       .tweet-shell .chaos-stage {
-        min-height: 420px;
+        min-height: 520px;
         transform: translateY(0);
       }
 
       .tweet-shell .piece {
-        width: min(27vw, 108px);
+        width: min(24vw, 92px);
       }
 
       .tweet-shell .tweet-pair {
-        width: min(48vw, 190px);
+        width: min(24vw, 92px);
+        aspect-ratio: 9 / 25;
+        grid-template-columns: 1fr;
+        grid-template-rows: 1fr 1fr;
         gap: 6px;
         padding: 6px;
       }
@@ -1066,14 +1108,14 @@
       .tweet-shell .piece:nth-child(2) {
         --scatter-x: 28vw;
         --scatter-y: 160px;
-        --grid-x: calc(28vw - 8px);
+        --grid-x: calc(34vw - 8px);
         --grid-y: 22px;
       }
 
       .tweet-shell .piece:nth-child(3) {
         --scatter-x: 67vw;
         --scatter-y: 46px;
-        --grid-x: calc(78vw - 108px);
+        --grid-x: calc(78vw - 92px);
         --grid-y: 24px;
       }
 
@@ -1116,16 +1158,16 @@
     <section class="world-shell">
       <div class="chaos-stage" aria-label="interactive artwork layout">
         <figure class="piece">
-          <img src="assets/world-sculpt-01.webp" alt="Ginseng fruit">
+          <img src="assets/world-sculpt-01.png" alt="Ginseng fruit">
         </figure>
         <figure class="piece">
-          <img src="assets/world-sculpt-02.webp" alt="Twisted sun">
+          <img src="assets/world-sculpt-02.png" alt="Twisted sun">
         </figure>
         <figure class="piece">
-          <img src="assets/world-sculpt-03.webp" alt="Fake landscape">
+          <img src="assets/world-sculpt-03.png" alt="Fake landscape">
         </figure>
         <figure class="piece">
-          <img src="assets/world-sculpt-04.webp" alt="Girl's Wing">
+          <img src="assets/world-sculpt-04.png" alt="Girl's Wing">
         </figure>
       </div>
 
@@ -1141,7 +1183,7 @@
     <section class="world-shell painting-shell">
       <div class="chaos-stage" aria-label="interactive painting layout">
         <figure class="piece">
-          <img src="assets/world-paint-01.webp" alt="Two figures with speech bubbles">
+          <img src="assets/world-paint-01.png" alt="Two figures with speech bubbles">
         </figure>
         <figure class="piece">
           <img src="assets/world-paint-02.jpg" alt="Pages with heart messages">
@@ -1153,7 +1195,7 @@
           <img src="assets/world-paint-04.png" alt="Graphic figures and icons">
         </figure>
         <figure class="piece">
-          <img src="assets/world-paint-05.webp" alt="Orange-haired figure in dark flowers">
+          <img src="assets/world-paint-05.png" alt="Orange-haired figure in dark flowers">
         </figure>
         <figure class="piece">
           <img src="assets/world-paint-06.jpg" alt="Blue night with birds">
@@ -1183,19 +1225,19 @@
           <img src="assets/world-poster-01.jpg" alt="Blue exhibition poster">
         </figure>
         <figure class="piece">
-          <img src="assets/world-poster-02.webp" alt="Poster with seagull and bold text">
+          <img src="assets/world-poster-02.png" alt="Poster with seagull and bold text">
         </figure>
         <figure class="piece">
-          <img src="assets/world-poster-03.webp" alt="Red portrait collage poster">
+          <img src="assets/world-poster-03.png" alt="Red portrait collage poster">
         </figure>
         <figure class="piece">
           <img src="assets/dcf2719a8c4bb749c387dac7c0fc6877.png" alt="Black and white character poster">
         </figure>
         <figure class="piece">
-          <img src="assets/1f60850b01542447af673fee999485c2.webp" alt="Black blue landscape poster">
+          <img src="assets/1f60850b01542447af673fee999485c2.png" alt="Black blue landscape poster">
         </figure>
         <figure class="piece">
-          <img src="assets/c1c5d31fd949696c7b4c71b466e1f545.webp" alt="Green figure poster">
+          <img src="assets/c1c5d31fd949696c7b4c71b466e1f545.png" alt="Green figure poster">
         </figure>
       </div>
 
@@ -1211,14 +1253,14 @@
     <section class="world-shell tweet-shell">
       <div class="chaos-stage" aria-label="interactive tweet layout">
         <figure class="piece">
-          <img src="assets/5f247dd5b016a806546e09f176819d76.webp" alt="Egg and flower process tweet">
+          <img src="assets/5f247dd5b016a806546e09f176819d76.webp" data-full="assets/5f247dd5b016a806546e09f176819d76-full.webp" alt="Egg and flower process tweet">
         </figure>
         <figure class="piece tweet-pair">
-          <img src="assets/fe4ebd728827942f7148600e7dca60b0.webp" alt="Blue and pink tweet page one">
-          <img src="assets/c5a0a078b65e37ada95dba36978b646c.webp" alt="Blue and pink tweet page two">
+          <img src="assets/fe4ebd728827942f7148600e7dca60b0.webp" data-full="assets/fe4ebd728827942f7148600e7dca60b0-full.webp" alt="Blue and pink tweet page one">
+          <img src="assets/c5a0a078b65e37ada95dba36978b646c.webp" data-full="assets/c5a0a078b65e37ada95dba36978b646c-full.webp" alt="Blue and pink tweet page two">
         </figure>
         <figure class="piece">
-          <img src="assets/ca4d3a7573f7e3c88160ae4402b0dd3d.webp" alt="Black recording style tweet">
+          <img src="assets/ca4d3a7573f7e3c88160ae4402b0dd3d.webp" data-full="assets/ca4d3a7573f7e3c88160ae4402b0dd3d-full.webp" alt="Black recording style tweet">
         </figure>
       </div>
 
@@ -1272,7 +1314,7 @@
 
         if (piece && shell.classList.contains("is-arranged")) {
           const image = event.target.closest("img") || piece.querySelector("img");
-          lightboxImage.src = image.src;
+          lightboxImage.src = image.dataset.full || image.src;
           lightboxImage.alt = image.alt;
           zoomLevel = 1;
           lightbox.style.setProperty("--zoom", zoomLevel);
