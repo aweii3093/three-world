@@ -76,14 +76,14 @@
     .entries {
       position: relative;
       z-index: 3;
-      width: 100vw;
+      width: min(1100px, 100%);
       height: min(570px, 76svh);
       display: flex;
       align-items: center;
-      gap: clamp(-120px, -8vw, -60px);
-      overflow-x: auto;
+      gap: clamp(0px, 1vw, 12px);
+      overflow-x: hidden;
       overflow-y: hidden;
-      padding: 0 calc((100vw - min(660px, 54vw, 840px)) / 2);
+      padding: 0;
       scroll-snap-type: x mandatory;
       scroll-behavior: auto;
       -webkit-overflow-scrolling: touch;
@@ -113,7 +113,8 @@
 
     .entry-card {
       position: relative;
-      flex: 0 0 min(660px, 54vw, 840px);
+      flex: 1 1 0;
+      min-width: 0;
       display: block;
       height: min(690px, 72svh);
       border: 0;
@@ -183,9 +184,16 @@
       pointer-events: none;
       user-select: none;
       z-index: 1;
-      opacity: 0.58;
-      filter: brightness(0.72);
+      opacity: 1;
+      filter: brightness(1);
       transition: opacity 240ms ease, filter 240ms ease;
+      width: min(100%, 27svh);
+      left: 50%;
+      transform: translateX(-50%) scale(2.2);
+    }
+
+    .entry-card.cat img {
+      transform: translate(-50%, 23%) scale(2.2);
     }
 
     .entry-card.is-centered img,
@@ -338,19 +346,19 @@
       }
 
       .entries {
-        width: 100vw;
+        width: 100%;
         height: calc(100svh - 132px);
-        min-height: 520px;
-        margin: 0 -10px;
+        min-height: 0;
+        margin: 0;
         display: flex;
-        gap: clamp(-96px, -22vw, -58px);
-        padding: 0 8px;
+        gap: 0;
+        padding: 0;
         transform: none;
       }
 
       .entry-card {
-        flex-basis: calc((100vw - 16px) / 1.42);
-        height: min(570px, 68svh);
+        flex-basis: 0;
+        height: min(68svh, calc((100vw - 20px) * 0.75));
       }
 
       .entry-card.work,
@@ -364,6 +372,11 @@
         height: 24px;
         padding: 0 9px;
         font-size: 10px;
+        top: auto;
+        bottom: 12%;
+        right: auto;
+        left: 50%;
+        transform: translateX(-50%);
       }
 
       .work .hold-badge {
@@ -379,6 +392,12 @@
       .cat .hold-badge {
         right: 28%;
         top: 47%;
+      }
+
+      .entry-card .hold-badge {
+        top: auto;
+        right: auto;
+        bottom: 0;
       }
 
       .world-title {
@@ -441,11 +460,6 @@
     entryCards.forEach((entry) => {
       entry.addEventListener("click", () => {
         if (isEntering) return;
-
-        if (!entry.classList.contains("is-centered")) {
-          centerEntry(entry, 520);
-          return;
-        }
 
         isEntering = true;
 
